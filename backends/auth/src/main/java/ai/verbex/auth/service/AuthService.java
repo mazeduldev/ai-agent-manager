@@ -1,6 +1,7 @@
 package ai.verbex.auth.service;
 
 import ai.verbex.auth.dto.SignupRequest;
+import ai.verbex.auth.exception.EmailAlreadyExistsException;
 import ai.verbex.auth.model.User;
 import ai.verbex.auth.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ public class AuthService {
 
     public User register(SignupRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-            throw new RuntimeException("User with this email already exists");
+            throw new EmailAlreadyExistsException();
         }
 
         User user = new User();
