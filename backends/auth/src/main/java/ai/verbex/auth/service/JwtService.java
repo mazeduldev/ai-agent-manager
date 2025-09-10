@@ -35,6 +35,14 @@ public class JwtService {
         return Keys.hmacShaKeyFor(refreshSecret.getBytes());
     }
 
+    public Long getAccessTokenExpirationInSeconds() {
+        return expirationMillis / 1000;
+    }
+
+    public Long getRefreshTokenExpirationInSeconds() {
+        return refreshExpirationMillis / 1000;
+    }
+
     public String generateAccessToken(User user) {
         return Jwts.builder()
                 .subject(user.getEmail())

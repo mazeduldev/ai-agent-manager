@@ -51,7 +51,13 @@ public class AuthService {
 
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
-        return new TokenResponse(accessToken, refreshToken);
+        return new TokenResponse(
+                accessToken,
+                refreshToken,
+                jwtService.getAccessTokenExpirationInSeconds(),
+                jwtService.getRefreshTokenExpirationInSeconds(),
+                new UserResponse(user.getId(), user.getEmail())
+        );
     }
 
     public TokenResponse refresh(String refreshToken) {
@@ -68,6 +74,12 @@ public class AuthService {
         }
         String newAccessToken = jwtService.generateAccessToken(user);
         String newRefreshToken = jwtService.generateRefreshToken(user);
-        return new TokenResponse(newAccessToken, newRefreshToken);
+        return new TokenResponse(
+                newAccessToken,
+                newRefreshToken,
+                jwtService.getAccessTokenExpirationInSeconds(),
+                jwtService.getRefreshTokenExpirationInSeconds(),
+                new UserResponse(user.getId(), user.getEmail())
+        );
     }
 }
