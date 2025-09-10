@@ -40,7 +40,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwtToken = authorizationHeader.substring(7);
             try {
-                UserResponse userInfo = jwtService.extractUserInfo(jwtToken);
+                UserResponse userInfo = jwtService.extractUserInfoFromAccessToken(jwtToken);
                 email = userInfo.email();
             } catch (Exception e) {
                 log.error("Jwt validation failed: {}", e.getMessage());
@@ -50,7 +50,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userService.loadUserByUsername(email);
 
-            if (jwtService.validateToken(jwtToken, userDetails)) {
+            if (jwtService.validateAccessToken(jwtToken, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails, null, null);

@@ -18,6 +18,9 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secret;
 
+    @Value("${jwt.refreshSecret}")
+    private String refreshSecret;
+
     @Value("${jwt.expiration}")
     private Long expirationMillis;
 
@@ -26,6 +29,10 @@ public class JwtService {
 
     private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
+    private SecretKey getRefreshSecretKey() {
+        return Keys.hmacShaKeyFor(refreshSecret.getBytes());
     }
 
     public String generateAccessToken(User user) {
@@ -44,38 +51,46 @@ public class JwtService {
                 .claim("userId", user.getId())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + refreshExpirationMillis))
-                .signWith(getSecretKey())
+                .signWith(getRefreshSecretKey())
                 .compact();
     }
 
-    public UserResponse extractUserInfo(String token) {
-        Claims claims = extractAllClaims(token);
+    public UserResponse extractUserInfoFromAccessToken(String token) {
+        Claims claims = extractAllClaims(token, getSecretKey());
         return new UserResponse(
                 claims.get("userId", Long.class),
                 claims.getSubject()
         );
     }
 
-    private Claims extractAllClaims(String token) {
+    public UserResponse extractUserInfoFromRefreshToken(String token) {
+        Claims claims = extractAllClaims(token, getRefreshSecretKey());
+        return new UserResponse(
+                claims.get("userId", Long.class),
+                claims.getSubject()
+        );
+    }
+
+    private Claims extractAllClaims(String token, SecretKey key) {
         return Jwts.parser()
-                .verifyWith(getSecretKey())
+                .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
     }
 
-    private Boolean isTokenExpired(String token) {
-        Claims claims = extractAllClaims(token);
+    private Boolean isTokenExpired(String token, SecretKey key) {
+        Claims claims = extractAllClaims(token, key);
         return claims.getExpiration().before(new Date());
     }
 
-    public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUserInfo(token).email();
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    public Boolean validateAccessToken(String token, UserDetails userDetails) {
+        final String username = extractUserInfoFromAccessToken(token).email();
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token, getSecretKey()));
     }
 
     public Boolean validateRefreshToken(String token, UserDetails userDetails) {
-        final String username = extractUserInfo(token).email();
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        final String username = extractUserInfoFromRefreshToken(token).email();
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token, getRefreshSecretKey()));
     }
 }

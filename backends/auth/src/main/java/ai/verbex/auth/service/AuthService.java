@@ -55,13 +55,15 @@ public class AuthService {
     }
 
     public TokenResponse refresh(String refreshToken) {
-        UserResponse userInfo = jwtService.extractUserInfo(refreshToken);
+        UserResponse userInfo = jwtService.extractUserInfoFromRefreshToken(refreshToken);
         User user = userRepository.findByEmail(userInfo.email())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        if (!jwtService.validateRefreshToken(refreshToken, org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password(user.getPasswordHash())
-                .build())) {
+        if (!jwtService.validateRefreshToken(
+                refreshToken,
+                org.springframework.security.core.userdetails.User.builder()
+                        .username(user.getEmail())
+                        .password(user.getPasswordHash())
+                        .build())) {
             throw new RuntimeException("Invalid refresh token");
         }
         String newAccessToken = jwtService.generateAccessToken(user);
