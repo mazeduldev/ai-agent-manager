@@ -30,7 +30,7 @@ public class AuthService {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    public User register(SignupRequest request) {
+    public TokenResponse register(SignupRequest request) {
         if (userRepository.existsByEmail(request.email())) {
             throw new EmailAlreadyExistsException();
         }
@@ -39,7 +39,14 @@ public class AuthService {
         user.setEmail(request.email());
         user.setPasswordHash(passwordEncoder.encode(request.password()));
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return new TokenResponse(
+                jwtService.generateAccessToken(savedUser),
+                jwtService.generateRefreshToken(savedUser),
+                jwtService.getAccessTokenExpirationInSeconds(),
+                jwtService.getRefreshTokenExpirationInSeconds(),
+                new UserResponse(savedUser.getId(), savedUser.getEmail())
+        );
     }
 
     public TokenResponse login(LoginRequest request) {
