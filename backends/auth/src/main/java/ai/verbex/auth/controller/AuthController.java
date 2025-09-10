@@ -1,9 +1,6 @@
 package ai.verbex.auth.controller;
 
-import ai.verbex.auth.dto.LoginRequest;
-import ai.verbex.auth.dto.SignupRequest;
-import ai.verbex.auth.dto.TokenResponse;
-import ai.verbex.auth.dto.UserResponse;
+import ai.verbex.auth.dto.*;
 import ai.verbex.auth.model.User;
 import ai.verbex.auth.service.AuthService;
 import jakarta.validation.Valid;
@@ -30,6 +27,12 @@ public class AuthController {
     public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request) {
         TokenResponse token = authService.login(request);
         return ResponseEntity.ok(token);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        TokenResponse tokenResponse = authService.refresh(request.refresh_token());
+        return ResponseEntity.ok(tokenResponse);
     }
 
 }

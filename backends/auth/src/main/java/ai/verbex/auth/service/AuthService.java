@@ -3,6 +3,7 @@ package ai.verbex.auth.service;
 import ai.verbex.auth.dto.LoginRequest;
 import ai.verbex.auth.dto.SignupRequest;
 import ai.verbex.auth.dto.TokenResponse;
+import ai.verbex.auth.dto.UserResponse;
 import ai.verbex.auth.exception.EmailAlreadyExistsException;
 import ai.verbex.auth.model.User;
 import ai.verbex.auth.repository.UserRepository;
@@ -48,7 +49,23 @@ public class AuthService {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String token = jwtService.generateAccessToken(user);
-        return new TokenResponse(token);
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+        return new TokenResponse(accessToken, refreshToken);
+    }
+
+    public TokenResponse refresh(String refreshToken) {
+        UserResponse userInfo = jwtService.extractUserInfo(refreshToken);
+        User user = userRepository.findByEmail(userInfo.email())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (!jwtService.validateRefreshToken(refreshToken, org.springframework.security.core.userdetails.User.builder()
+                .username(user.getEmail())
+                .password(user.getPasswordHash())
+                .build())) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+        String newAccessToken = jwtService.generateAccessToken(user);
+        String newRefreshToken = jwtService.generateRefreshToken(user);
+        return new TokenResponse(newAccessToken, newRefreshToken);
     }
 }
