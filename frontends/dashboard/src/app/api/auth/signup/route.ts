@@ -11,7 +11,7 @@ function isTokenResponse(
 }
 
 export async function POST(req: NextRequest) {
-	const authServerUrl = process.env.AUTH_SERVER_URL || "http://localhost:8080";
+	const authServerUrl = process.env.AUTH_SERVER_URL;
 
 	try {
 		const { email, password } = await req.json();

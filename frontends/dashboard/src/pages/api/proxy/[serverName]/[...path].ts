@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 // Supported base server and urls
 const baseUrl = {
-	authServer: process.env.AUTH_SERVER_URL || "http://localhost:8080",
+	authServer: process.env.AUTH_SERVER_URL,
 };
 
 export default async function handler(
