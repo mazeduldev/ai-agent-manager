@@ -9,20 +9,12 @@ export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse,
 ) {
-	const { path } = req.query;
+	const { serverName, path } = req.query;
 	console.log("Proxying request to path:", path);
 
 	// Determine backend URL
-	let baseServerUrl = "";
-	let newPath = "";
-
-	if (Array.isArray(path)) {
-		const baseServer = path[0];
-		baseServerUrl = baseUrl[baseServer as keyof typeof baseUrl];
-		newPath = `/${path.slice(1).join("/")}`;
-	} else {
-		baseServerUrl = baseUrl[path as keyof typeof baseUrl];
-	}
+	const baseServerUrl = baseUrl[serverName as keyof typeof baseUrl];
+	const newPath = Array.isArray(path) ? `/${path.join("/")}` : `/${path}`;
 
 	const backendUrl = `${baseServerUrl}${newPath}`;
 
