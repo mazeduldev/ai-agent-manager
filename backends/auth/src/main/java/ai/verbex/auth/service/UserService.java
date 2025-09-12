@@ -1,6 +1,7 @@
 package ai.verbex.auth.service;
 
 import ai.verbex.auth.dto.ApiKeyResponse;
+import ai.verbex.auth.exception.DuplicateApiKeyException;
 import ai.verbex.auth.model.ApiKey;
 import ai.verbex.auth.model.User;
 import ai.verbex.auth.repository.ApiKeyRepository;
@@ -46,23 +47,29 @@ public class UserService implements UserDetailsService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = getUserByEmail(email);
 
+        boolean isExistApiKey = apiKeyRepository.existsByUserId(user.getId());
+
+        if (isExistApiKey) {
+            throw new DuplicateApiKeyException();
+        }
+
         byte[] randomBytes = new byte[32];
         new SecureRandom().nextBytes(randomBytes);
 
-        String apiKey = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
-        String apiKeyHash = passwordEncoder.encode(apiKey);
+        String apiKeyString = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+        String apiKeyHash = passwordEncoder.encode(apiKeyString);
 
-        ApiKey apiKeyEntity = new ApiKey();
-        apiKeyEntity.setApiKeyHash(apiKeyHash);
-        apiKeyEntity.setApiKeyPrefix(apiKey.substring(0, 10));
-        apiKeyEntity.setUser(user);
+        ApiKey apiKey = new ApiKey();
+        apiKey.setApiKeyHash(apiKeyHash);
+        apiKey.setApiKeyPrefix(apiKeyString.substring(0, 10));
+        apiKey.setUser(user);
 
-        ApiKey savedApiKey = apiKeyRepository.save(apiKeyEntity);
+        ApiKey savedApiKey = apiKeyRepository.save(apiKey);
 
         user.setApiKey(savedApiKey);
         userRepository.save(user);
 
-        return new ApiKeyResponse(savedApiKey.getId(), savedApiKey.getApiKeyPrefix(), apiKey);
+        return new ApiKeyResponse(savedApiKey.getId(), savedApiKey.getApiKeyPrefix(), apiKeyString);
     }
 
     @Override
