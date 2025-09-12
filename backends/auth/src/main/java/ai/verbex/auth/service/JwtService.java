@@ -45,8 +45,8 @@ public class JwtService {
 
     public String generateAccessToken(User user) {
         return Jwts.builder()
-                .subject(user.getEmail())
-                .claim("userId", user.getId())
+                .subject(user.getId())
+                .claim("email", user.getEmail())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMillis))
                 .signWith(getSecretKey())
@@ -55,8 +55,8 @@ public class JwtService {
 
     public String generateRefreshToken(User user) {
         return Jwts.builder()
-                .subject(user.getEmail())
-                .claim("userId", user.getId())
+                .subject(user.getId())
+                .claim("email", user.getEmail())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + refreshExpirationMillis))
                 .signWith(getRefreshSecretKey())
@@ -66,16 +66,16 @@ public class JwtService {
     public UserResponse extractUserInfoFromAccessToken(String token) {
         Claims claims = extractAllClaims(token, getSecretKey());
         return new UserResponse(
-                claims.get("userId", Long.class),
-                claims.getSubject()
+                claims.getSubject(),
+                claims.get("email", String.class)
         );
     }
 
     public UserResponse extractUserInfoFromRefreshToken(String token) {
         Claims claims = extractAllClaims(token, getRefreshSecretKey());
         return new UserResponse(
-                claims.get("userId", Long.class),
-                claims.getSubject()
+                claims.getSubject(),
+                claims.get("email", String.class)
         );
     }
 

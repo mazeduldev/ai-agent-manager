@@ -3,8 +3,8 @@ package ai.verbex.auth.repository;
 import ai.verbex.auth.model.ApiKey;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ApiKeyRepository extends JpaRepository<ApiKey, Long> {
-    boolean existsByUserId(Long userId);
+public interface ApiKeyRepository extends JpaRepository<ApiKey, String> {
+    boolean existsByUserId(String userId);
 
-    void deleteByUserId(Long userId);
+    void deleteByUserId(String userId);
 }
