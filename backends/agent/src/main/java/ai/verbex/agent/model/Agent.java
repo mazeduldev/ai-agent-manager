@@ -1,7 +1,10 @@
 package ai.verbex.agent.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,7 +15,12 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "agents")
+@Table(
+        name = "agents",
+        indexes = {
+                @Index(name = "idx_agents_user_id", columnList = "user_id")
+        }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
