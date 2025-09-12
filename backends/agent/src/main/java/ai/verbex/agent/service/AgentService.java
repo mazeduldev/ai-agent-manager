@@ -1,10 +1,12 @@
 package ai.verbex.agent.service;
 
 import ai.verbex.agent.dto.CreateAgentRequest;
+import ai.verbex.agent.dto.UpdateAgentRequest;
 import ai.verbex.agent.exception.NotFoundException;
 import ai.verbex.agent.model.Agent;
 import ai.verbex.agent.repository.AgentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,10 +36,23 @@ public class AgentService {
                 .orElseThrow(() -> new NotFoundException("Agent not found"));
     }
 
-    public void deleteAgent(String id) {
-        if (agentRepository.existsById(id)) {
-            // todo: delete related conversations and messages first
-            agentRepository.deleteById(id);
+    public Agent updateAgent(String id, String userId, UpdateAgentRequest request) {
+        Agent agent = getAgentById(id);
+        if (!agent.getUserId().equals(userId)) {
+            throw new AccessDeniedException("You do not have permission to update this agent");
         }
+        agent.setName(request.name());
+        agent.setSystemPrompt(request.systemPrompt());
+        agent.setTemperature(request.temperature());
+        return agentRepository.save(agent);
+    }
+
+    public void deleteAgent(String id, String userId) {
+        Agent agent = getAgentById(id);
+        if (!agent.getUserId().equals(userId)) {
+            throw new AccessDeniedException("You do not have permission to delete this agent");
+        }
+        // todo: delete related conversations and messages first
+        agentRepository.deleteById(id);
     }
 }

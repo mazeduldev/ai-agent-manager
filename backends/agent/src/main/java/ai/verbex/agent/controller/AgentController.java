@@ -1,13 +1,13 @@
 package ai.verbex.agent.controller;
 
 import ai.verbex.agent.dto.CreateAgentRequest;
+import ai.verbex.agent.dto.UpdateAgentRequest;
 import ai.verbex.agent.model.Agent;
 import ai.verbex.agent.service.AgentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -37,13 +37,18 @@ public class AgentController {
         return ResponseEntity.ok(agent);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Agent> updateAgent(
+            @PathVariable String id,
+            Principal principal,
+            @Valid @RequestBody UpdateAgentRequest request) {
+        Agent updated = agentService.updateAgent(id, principal.getName(), request);
+        return ResponseEntity.ok(updated);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAgent(@PathVariable String id, Principal principal) {
-        Agent agent = agentService.getAgentById(id);
-        if (!agent.getUserId().equals(principal.getName())) {
-            throw new AccessDeniedException("You do not have permission to delete this agent");
-        }
-        agentService.deleteAgent(id);
+        agentService.deleteAgent(id, principal.getName());
         return ResponseEntity.noContent().build();
     }
 }
