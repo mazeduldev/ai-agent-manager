@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/users")
 @CrossOrigin(origins = "*")
@@ -31,8 +33,14 @@ public class UserController {
     }
 
     @PostMapping("/api-keys")
-    public ResponseEntity<ApiKeyResponse> generateApiKey() {
-        ApiKeyResponse apiKeyResponse = userService.generateApiKey();
+    public ResponseEntity<ApiKeyResponse> generateApiKey(Principal principal) {
+        ApiKeyResponse apiKeyResponse = userService.generateApiKey(principal.getName());
         return ResponseEntity.ok(apiKeyResponse);
+    }
+
+    @DeleteMapping("/api-keys")
+    public ResponseEntity<Void> revokeApiKey(Principal principal) {
+        userService.revokeApiKey(principal.getName());
+        return ResponseEntity.noContent().build();
     }
 }

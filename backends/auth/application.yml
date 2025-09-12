@@ -20,3 +20,8 @@ jwt:
   refreshSecret: ${JWT_REFRESH_SECRET}
   expiration: 900000  # 15 minutes
   refreshExpiration: 604800000  # 7 days
+
+logging:
+  level:
+    org.springframework: INFO
+    ai.verbex: DEBUG

@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ApiKeyRepository extends JpaRepository<ApiKey, Long> {
     boolean existsByUserId(Long userId);
+
+    void deleteByUserId(Long userId);
 }

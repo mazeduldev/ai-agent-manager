@@ -9,7 +9,6 @@ import ai.verbex.auth.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -43,9 +42,8 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public ApiKeyResponse generateApiKey() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = getUserByEmail(email);
+    public ApiKeyResponse generateApiKey(String userEmail) {
+        User user = getUserByEmail(userEmail);
 
         boolean isExistApiKey = apiKeyRepository.existsByUserId(user.getId());
 
@@ -70,6 +68,14 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
 
         return new ApiKeyResponse(savedApiKey.getId(), savedApiKey.getApiKeyPrefix(), apiKeyString);
+    }
+
+    @Transactional
+    public void revokeApiKey(String userEmail) {
+        User user = getUserByEmail(userEmail);
+        apiKeyRepository.deleteByUserId(user.getId());
+        user.setApiKey(null);
+        userRepository.save(user);
     }
 
     @Override
