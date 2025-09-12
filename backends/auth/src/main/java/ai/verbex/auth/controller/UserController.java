@@ -8,7 +8,6 @@ import ai.verbex.auth.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -26,9 +25,8 @@ public class UserController {
     private JwtService jwtService;
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponse> getMyProfile() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userService.getUserByEmail(email);
+    public ResponseEntity<UserResponse> getMyProfile(Principal principal) {
+        User user = userService.getUserByEmail(principal.getName());
         return ResponseEntity.ok(new UserResponse(user.getId(), user.getEmail()));
     }
 
