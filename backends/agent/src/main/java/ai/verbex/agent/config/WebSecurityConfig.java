@@ -27,7 +27,7 @@ public class WebSecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/agents/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/agents/*").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(internalServiceAuthFilter, UsernamePasswordAuthenticationFilter.class)
