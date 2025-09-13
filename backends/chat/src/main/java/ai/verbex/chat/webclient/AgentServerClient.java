@@ -1,0 +1,14 @@
+package ai.verbex.chat.webclient;
+
+import ai.verbex.chat.config.FeignClientConfig;
+import ai.verbex.chat.dto.AgentDto;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+@FeignClient(name = "agent-server", url = "${internal.agent-server-url}", configuration = FeignClientConfig.class)
+public interface AgentServerClient {
+
+    @GetMapping("/agents/{agentId}")
+    AgentDto getAgentById(@PathVariable("agentId") String agentId);
+}

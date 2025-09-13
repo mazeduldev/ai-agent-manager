@@ -28,3 +28,7 @@ logging:
   level:
     org.springframework: INFO
     ai.verbex: DEBUG
+
+internal:
+  agent-server-url: ${AGENT_SERVER_URL:http://localhost:8100}
+  api-key: ${INTERNAL_API_KEY}
