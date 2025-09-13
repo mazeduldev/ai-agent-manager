@@ -22,10 +22,10 @@ public class Message {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conversation_id", nullable = false)
     private Conversation conversation;
-    
+
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
-    private MessageRole role;
+    private Role role;
 
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
@@ -34,7 +34,12 @@ public class Message {
     @Column(name = "created_at", columnDefinition = "TIMESTAMP", updatable = false)
     private LocalDateTime createdAt;
 
-    public enum MessageRole {
-        USER, ASSISTANT
+    public enum Role {
+        SYSTEM("system"),
+        USER("user"),
+        ASSISTANT("assistant");
+
+        Role(String role) {
+        }
     }
 }

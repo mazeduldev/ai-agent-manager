@@ -21,14 +21,17 @@ public class Conversation {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Message> messages;
-
     @Column(name = "agent_id", nullable = false)
     private String agentId;
 
-    @Column(name = "user_id")
-    private String userId;
+    @Column(name = "first_message_snippet", length = 255, nullable = false)
+    private String firstMessageSnippet;
+
+    @Column(name = "message_count", nullable = false)
+    private Integer messageCount = 0;
+
+    @OneToMany(mappedBy = "conversation", cascade = CascadeType.REMOVE)
+    private List<Message> messages;
 
     @CreationTimestamp
     @Column(name = "started_at", columnDefinition = "TIMESTAMP", updatable = false)
@@ -38,6 +41,13 @@ public class Conversation {
     @Column(name = "ended_at", columnDefinition = "TIMESTAMP")
     private LocalDateTime endedAt;
 
-    @Column(name = "message_count", nullable = false)
-    private Integer messageCount = 0;
+    public Conversation(Conversation c) {
+        this.id = c.id;
+        this.agentId = c.agentId;
+        this.firstMessageSnippet = c.firstMessageSnippet;
+        this.messageCount = c.messageCount;
+        this.messages = c.messages;
+        this.startedAt = c.startedAt;
+        this.endedAt = c.endedAt;
+    }
 }

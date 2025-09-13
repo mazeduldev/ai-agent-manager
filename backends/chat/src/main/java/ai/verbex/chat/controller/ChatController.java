@@ -1,12 +1,21 @@
 package ai.verbex.chat.controller;
 
 import ai.verbex.chat.dto.AgentDto;
+import ai.verbex.chat.dto.ChatRequest;
+import ai.verbex.chat.model.Conversation;
+import ai.verbex.chat.model.Message;
 import ai.verbex.chat.service.AgentService;
 import ai.verbex.chat.service.ChatService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RestController
 @RequestMapping("/chat")
@@ -18,71 +27,71 @@ public class ChatController {
     private final ChatService chatService;
     private final AgentService agentService;
 
-    @GetMapping("/agents/{agentId}")
-    public ResponseEntity<AgentDto> getAgentDetails(@PathVariable String agentId) {
-        return ResponseEntity.ok(agentService.getAgentById(agentId));
+    @PostMapping(path = "/{agentId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<Map<String, Object>>> streamChat(@PathVariable String agentId,
+                                                                 @Valid @RequestBody ChatRequest req) {
+        AgentDto agentDto = agentService.getAgentById(agentId);
+
+        Conversation conversation;
+        if (req.conversationId() == null) {
+            conversation = new Conversation();
+            conversation.setAgentId(agentDto.getId());
+            conversation.setFirstMessageSnippet(req.message());
+            conversation.setMessageCount(1);
+            conversation = chatService.saveConversation(conversation);
+        } else {
+            conversation = chatService.getConversation(req.conversationId());
+        }
+
+        Message userMsg = new Message();
+        userMsg.setConversation(conversation);
+        userMsg.setRole(Message.Role.USER);
+        userMsg.setContent(req.message());
+        userMsg = chatService.saveMessage(userMsg);
+
+        var prompt = chatService.buildPromptWithHistory(agentDto, conversation, req.message(), 10);
+
+        log.debug(prompt.toString());
+
+        AtomicReference<StringBuilder> collected = new AtomicReference<>(new StringBuilder());
+
+        Flux<String> chunks = chatService.streamResponse(agentDto, prompt);
+
+        ServerSentEvent<Map<String, Object>> initEvent = ServerSentEvent
+                .<Map<String, Object>>builder(Map.of(
+                        "conversationId", conversation.getId(),
+                        "chunk", ""
+                ))
+                .event("init")
+                .build();
+
+        Conversation finalConversation = conversation;
+        Flux<ServerSentEvent<Map<String, Object>>> chunkEvents = chunks
+                .map(chunk -> {
+                    collected.get().append(chunk);
+                    return ServerSentEvent.<Map<String, Object>>builder(Map.of(
+                                    "conversationId", finalConversation.getId(),
+                                    "chunk", chunk
+                            ))
+                            .event("message")
+                            .build();
+                })
+                .doOnComplete(() -> {
+                    String full = collected.get().toString();
+                    if (!full.isBlank()) {
+                        Conversation updatedConversation = new Conversation(finalConversation);
+                        updatedConversation.setMessageCount(finalConversation.getMessageCount() + 1);
+                        updatedConversation = chatService.saveConversation(updatedConversation);
+
+                        Message assistantMsg = new Message();
+                        assistantMsg.setConversation(updatedConversation);
+                        assistantMsg.setRole(Message.Role.ASSISTANT);
+                        assistantMsg.setContent(full);
+                        chatService.saveMessage(assistantMsg);
+                    }
+                });
+
+        return Flux.concat(Flux.just(initEvent), chunkEvents)
+                .doOnError(err -> System.err.println("Error streaming: " + err.getMessage()));
     }
-
-    //    @PostMapping(path = "/{agentId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    //    public Flux<ServerSentEvent<Map<String, Object>>> streamChat(@PathVariable Long agentId,
-    //                                                                 @RequestParam(required = false) Long conversationId,
-    //                                                                 @RequestBody SendRequest req) {
-    //        Agent agent = chatService.getAgent(agentId);
-    //
-    //        Conversation conversation;
-    //        if (conversationId == null) {
-    //            conversation = new Conversation();
-    //            conversation.setAgent(agent);
-    //            conversation.setTitle("New Conversation");
-    //            conversation.setCreatedAt(Instant.now());
-    //            conversation = chatService.createConversation(conversation);
-    //        } else {
-    //            conversation = chatService.getConversation(conversationId);
-    //        }
-    //
-    //        Message userMsg = new Message();
-    //        userMsg.setConversation(conversation);
-    //        userMsg.setRole("user");
-    //        userMsg.setContent(req.content());
-    //        userMsg.setCreatedAt(Instant.now());
-    //        chatService.saveMessage(userMsg);
-    //
-    //        var prompt = chatService.buildPromptWithHistory(agent, conversation, req.content(), 10);
-    //
-    //        AtomicReference<StringBuilder> collected = new AtomicReference<>(new StringBuilder());
-    //
-    //        Flux<String> chunks = chatService.streamResponse(agent, prompt);
-    //
-    //        ServerSentEvent<Map<String, Object>> initEvent = ServerSentEvent
-    //                .<Map<String, Object>>builder(Map.of("conversationId", conversation.getId(), "chunk", ""))
-    //                .event("init")
-    //                .build();
-    //
-    //        Flux<ServerSentEvent<Map<String, Object>>> chunkEvents = chunks
-    //                .map(chunk -> {
-    //                    collected.get().append(chunk);
-    //                    return ServerSentEvent.<Map<String, Object>>builder(
-    //                            Map.of("conversationId", conversation.getId(), "chunk", chunk)
-    //                    ).event("message").build();
-    //                })
-    //                .doOnComplete(() -> {
-    //                    String full = collected.get().toString();
-    //                    if (!full.isBlank()) {
-    //                        Message assistantMsg = new Message();
-    //                        assistantMsg.setConversation(conversation);
-    //                        assistantMsg.setRole("assistant");
-    //                        assistantMsg.setContent(full);
-    //                        assistantMsg.setCreatedAt(Instant.now());
-    //                        chatService.saveMessage(assistantMsg);
-    //                    }
-    //                });
-    //
-    //        return Flux.concat(Flux.just(initEvent), chunkEvents)
-    //                .doOnError(err -> System.err.println("Error streaming: " + err.getMessage()));
-    //    }
-
-    //    @GetMapping("/{agentId}/conversations")
-    //    public ResponseEntity<?> getConversations(@PathVariable String agentId) {
-    //        return ResponseEntity.ok(chatService.getConversations(agentId));
-    //    }
 }
