@@ -1,10 +1,10 @@
-application:
-  name: agent-server
-
 server:
-  port: 8200
+  port: ${PORT:8200}
 
 spring:
+  application:
+    name: chat-server
+
   datasource:
     url: jdbc:postgresql://localhost:5432/verbex
     username: ${DB_USERNAME}
