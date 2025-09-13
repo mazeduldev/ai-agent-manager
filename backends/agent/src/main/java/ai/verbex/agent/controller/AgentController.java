@@ -27,7 +27,7 @@ public class AgentController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<Agent>> listAgents(Principal principal) {
+    public ResponseEntity<List<Agent>> listAgentsByUser(Principal principal) {
         return ResponseEntity.ok(agentService.listAgentsByUserId(principal.getName()));
     }
 

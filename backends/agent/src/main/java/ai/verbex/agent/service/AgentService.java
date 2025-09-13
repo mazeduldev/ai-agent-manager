@@ -22,7 +22,8 @@ public class AgentService {
                 .userId(userId)
                 .name(request.name())
                 .systemPrompt(request.systemPrompt())
-                .temperature((request.temperature()))
+                .temperature(request.temperature())
+                .webhookUrl(request.webhookUrl())
                 .build();
         return agentRepository.save(agent);
     }
@@ -44,6 +45,7 @@ public class AgentService {
         agent.setName(request.name());
         agent.setSystemPrompt(request.systemPrompt());
         agent.setTemperature(request.temperature());
+        agent.setWebhookUrl(request.webhookUrl());
         return agentRepository.save(agent);
     }
 
