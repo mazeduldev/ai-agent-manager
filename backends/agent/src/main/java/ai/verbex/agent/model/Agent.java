@@ -49,8 +49,8 @@ public class Agent {
     @DecimalMax("1.0")
     private Double temperature;
 
-    @Column(name = "webhook_url", length = 500)
-    @Size(max = 500)
+    @Column(name = "webhook_url", length = 255)
+    @Size(max = 255)
     private String webhookUrl;
 
     @CreationTimestamp
