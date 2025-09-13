@@ -25,7 +25,7 @@ public class ApiKey {
     @Column(name = "api_key_hash", nullable = false, unique = true, length = 255)
     private String apiKeyHash;
 
-    @Column(name = "api_key_prefix", nullable = false, length = 10)
+    @Column(name = "api_key_prefix", nullable = false, unique = true, length = 10)
     private String apiKeyPrefix;
 
     @CreationTimestamp

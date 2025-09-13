@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  application:
+    name: auth-server
   datasource:
     url: jdbc:postgresql://localhost:5432/verbex
     username: ${DB_USERNAME}
