@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -18,7 +19,16 @@ public class ConversationService {
 
     public List<ConversationDto> listConversationsByAgentId(String agentId) {
         List<Conversation> conversationList = conversationRepository.findByAgentId(agentId);
-        return conversationList.stream().map(conversation -> new ConversationDto(
+        return conversationList.stream().map(this::convertToDto).toList();
+    }
+
+    public Conversation getConversationById(String conversationId) {
+        Optional<Conversation> conversation = conversationRepository.findById(conversationId);
+        return conversation.orElse(null);
+    }
+
+    private ConversationDto convertToDto(Conversation conversation) {
+        return new ConversationDto(
                 conversation.getId(),
                 conversation.getAgentId(),
                 conversation.getFirstMessageSnippet(),
@@ -26,6 +36,6 @@ public class ConversationService {
                 null,
                 conversation.getStartedAt(),
                 conversation.getEndedAt()
-        )).toList();
+        );
     }
 }

@@ -13,4 +13,6 @@ public interface MessageRepository extends JpaRepository<Message, String> {
 
     @Query("SELECT m FROM Message m WHERE m.conversation.id = :conversationId ORDER BY m.createdAt DESC")
     List<Message> findLastNByConversationDesc(String conversationId, Pageable pageable);
+
+    List<Message> findByConversationIdOrderByCreatedAtAsc(String conversationId);
 }

@@ -2,9 +2,12 @@ package ai.verbex.chat.controller;
 
 import ai.verbex.chat.dto.AgentDto;
 import ai.verbex.chat.dto.ConversationDto;
+import ai.verbex.chat.dto.MessageDto;
 import ai.verbex.chat.exception.NotFoundException;
+import ai.verbex.chat.model.Conversation;
 import ai.verbex.chat.service.AgentService;
 import ai.verbex.chat.service.ConversationService;
+import ai.verbex.chat.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
@@ -22,6 +25,7 @@ public class ConversationController {
 
     private final ConversationService conversationService;
     private final AgentService agentService;
+    private final MessageService messageService;
 
     @GetMapping("/agents/{agentId}")
     public List<ConversationDto> listConversationsByAgentIdAndUser(@PathVariable("agentId") String agentId, Principal principal) {
@@ -33,5 +37,26 @@ public class ConversationController {
             throw new AccessDeniedException("You do not have permission to access this agent's conversations.");
         }
         return conversationService.listConversationsByAgentId(agentDto.getId());
+    }
+
+
+    @GetMapping("/{conversationId}/messages")
+    public List<MessageDto> getMessagesByConversationId(@PathVariable("conversationId") String conversationId, Principal principal) {
+        // Get the conversation to verify ownership
+        Conversation conversation = conversationService.getConversationById(conversationId);
+        if (conversation == null) {
+            throw new NotFoundException("Conversation not found.");
+        }
+
+        // Get the agent to verify user has access
+        AgentDto agentDto = agentService.getAgentById(conversation.getAgentId());
+        if (agentDto == null) {
+            throw new NotFoundException("Agent not found.");
+        }
+        if (!agentDto.getUserId().equals(principal.getName())) {
+            throw new AccessDeniedException("You do not have permission to access this conversation's messages.");
+        }
+
+        return messageService.getMessagesByConversationId(conversationId);
     }
 }
