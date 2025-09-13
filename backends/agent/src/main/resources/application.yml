@@ -1,10 +1,9 @@
-application:
-  name: agent-server
-
 server:
   port: 8100
 
 spring:
+  application:
+    name: agent-server
   datasource:
     url: jdbc:postgresql://localhost:5432/verbex
     username: ${DB_USERNAME}
@@ -20,6 +19,9 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET}
+
+internal:
+  api-key: ${INTERNAL_API_KEY}
 
 logging:
   level:
