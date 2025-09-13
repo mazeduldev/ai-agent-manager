@@ -1,11 +1,14 @@
 package ai.verbex.chat.service;
 
 import ai.verbex.chat.dto.AgentDto;
+import ai.verbex.chat.dto.WebhookPayload;
 import ai.verbex.chat.exception.NotFoundException;
 import ai.verbex.chat.model.Conversation;
 import ai.verbex.chat.model.Message;
 import ai.verbex.chat.repository.ConversationRepository;
 import ai.verbex.chat.repository.MessageRepository;
+import ai.verbex.chat.webclient.ExternalWebClient;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -19,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +36,7 @@ public class ChatService {
     private final ChatClient.Builder chatClientBuilder;
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
+    private final ExternalWebClient externalWebClient;
 
     public Conversation saveConversation(Conversation conversation) {
         return conversationRepository.save(conversation);
@@ -76,5 +81,19 @@ public class ChatService {
     public Flux<String> streamResponse(AgentDto agent, Prompt prompt) {
         ChatClient chatClient = chatClientBuilder.build();
         return chatClient.prompt(prompt).stream().content();
+    }
+
+    public void triggerNewConversationWebhook(
+            @NotBlank String webhookUrl,
+            @NotBlank String agentId,
+            @NotBlank String conversationId) {
+
+        try {
+            URI uri = URI.create(webhookUrl);
+            externalWebClient.postToWebhook(uri, new WebhookPayload(agentId, conversationId));
+            log.info("Successfully triggered webhook for conversationId: {}", conversationId);
+        } catch (Exception e) {
+            log.error("Failed to trigger webhook for conversationId: {}", e.getMessage());
+        }
     }
 }

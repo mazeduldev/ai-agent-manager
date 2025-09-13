@@ -37,8 +37,18 @@ public class ChatController {
             conversation = new Conversation();
             conversation.setAgentId(agentDto.getId());
             conversation.setFirstMessageSnippet(req.message());
-            conversation.setMessageCount(1);
+            conversation.setMessageCount(0);
             conversation = chatService.saveConversation(conversation);
+
+            // Call webhook for new conversation
+            if (agentDto.getWebhookUrl() != null && !agentDto.getWebhookUrl().isBlank()) {
+                log.debug(
+                        "Triggering new conversation webhook for agentId: {}, conversationId: {}",
+                        agentDto.getId(), conversation.getId());
+
+                chatService.triggerNewConversationWebhook(
+                        agentDto.getWebhookUrl(), agentDto.getId(), conversation.getId());
+            }
         } else {
             conversation = chatService.getConversation(req.conversationId());
         }
@@ -80,7 +90,7 @@ public class ChatController {
                     String full = collected.get().toString();
                     if (!full.isBlank()) {
                         Conversation updatedConversation = new Conversation(finalConversation);
-                        updatedConversation.setMessageCount(finalConversation.getMessageCount() + 1);
+                        updatedConversation.setMessageCount(finalConversation.getMessageCount() + 2); // user + assistant
                         updatedConversation = chatService.saveConversation(updatedConversation);
 
                         Message assistantMsg = new Message();
