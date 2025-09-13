@@ -76,7 +76,7 @@ public class GlobalExceptionHandler {
         log.warn("Access denied: {}", ex.getMessage());
 
         ErrorResponse errorResponse = new ErrorResponse(
-                "Access denied",
+                ex.getMessage(),
                 HttpStatus.FORBIDDEN.value(),
                 LocalDateTime.now().toString()
         );

@@ -30,7 +30,7 @@ public class Conversation {
     @Column(name = "message_count", nullable = false)
     private Integer messageCount = 0;
 
-    @OneToMany(mappedBy = "conversation", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "conversation", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<Message> messages;
 
     @CreationTimestamp
