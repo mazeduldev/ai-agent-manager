@@ -1,4 +1,3 @@
-"use client";
 import {
 	Card,
 	CardContent,
@@ -48,7 +47,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({
 		}
 	};
 
-	const truncateText = (text: string, maxLength = 120) => {
+	const truncateText = (text: string, maxLength = 300) => {
 		return text.length > maxLength
 			? `${text.substring(0, maxLength)}...`
 			: text;
@@ -71,40 +70,40 @@ export const AgentCard: React.FC<AgentCardProps> = ({
 				</CardDescription>
 			</CardHeader>
 
+			<div className="flex-1" />
+
 			<CardContent className="flex-1 pt-0">
-				{agent.webhookUrl && (
-					<div className="space-y-2">
-						<Separator />
-						<div className="space-y-1">
-							<div className="flex items-center gap-2">
-								<Webhook className="h-4 w-4 text-muted-foreground" />
-								<span className="text-sm font-medium">Webhook URL</span>
-							</div>
-							<div className="flex items-center gap-2 p-2 bg-muted rounded-md">
-								<code className="text-xs text-muted-foreground flex-1 truncate">
-									{agent.webhookUrl}
-								</code>
-								<Button
-									variant="ghost"
-									size="sm"
-									onClick={copyWebhookUrl}
-									className="h-6 w-6 p-0"
-								>
-									<Copy className="h-3 w-3" />
-								</Button>
-							</div>
+				<div className="space-y-2">
+					<Separator />
+					<div className="space-y-1">
+						<div className="flex items-center gap-2">
+							<Webhook className="h-4 w-4 text-muted-foreground" />
+							<span className="text-sm font-medium">Webhook URL</span>
+						</div>
+						<div className="flex items-center gap-2 p-2 bg-muted rounded-md">
+							<code className="text-xs text-muted-foreground flex-1 truncate">
+								{agent.webhookUrl}
+							</code>
+							<Button
+								variant="ghost"
+								size="sm"
+								onClick={copyWebhookUrl}
+								className="h-6 w-6 p-0"
+							>
+								<Copy className="h-3 w-3" />
+							</Button>
 						</div>
 					</div>
-				)}
+				</div>
 			</CardContent>
 
 			<CardFooter className="pt-4">
 				<div className="grid grid-cols-2 gap-2 w-full">
 					<Button
-						variant="default"
+						variant="outline"
 						size="sm"
 						onClick={() => onPublicChat?.(agent.id)}
-						className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+						className="flex items-center gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300"
 					>
 						<MessageCircle className="h-4 w-4" />
 						Public Chat
@@ -132,10 +131,10 @@ export const AgentCard: React.FC<AgentCardProps> = ({
 					</Button>
 
 					<Button
-						variant="destructive"
+						variant="outline"
 						size="sm"
 						onClick={() => onDeleteAgent?.(agent.id)}
-						className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white"
+						className="flex items-center gap-2 border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300"
 					>
 						<Trash2 className="h-4 w-4" />
 						Delete
