@@ -6,17 +6,22 @@ const supportedBaseUrls = {
 	agentServer: process.env.AGENT_SERVER_URL,
 	chatServer: process.env.CHAT_SERVER_URL,
 };
+const supportedServers = Object.keys(supportedBaseUrls);
+
+function startsWithSupportedServer(str: string): boolean {
+	return supportedServers.some((server) => str.startsWith(`/${server}`));
+}
 
 export async function middleware(req: NextRequest) {
 	console.log("Middleware triggered for:", req.url);
 
 	// Only intercept API calls to backend
-	if (req.nextUrl.pathname.startsWith("/api/proxy/")) {
+	if (startsWithSupportedServer(req.nextUrl.pathname)) {
 		// Determine backend URL
-		const serverName = req.nextUrl.pathname.split("/")[3];
+		const serverName = req.nextUrl.pathname.split("/")[1];
 		console.log("Server Name:", serverName);
 
-		const path = req.nextUrl.pathname.split("/").slice(4).join("/");
+		const path = req.nextUrl.pathname.split("/").slice(2).join("/");
 		console.log("Path:", path);
 
 		const backendBaseUrl =
@@ -179,5 +184,10 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-	matcher: ["/api/proxy/:path*", "/dashboard/:path*"],
+	matcher: [
+		"/authServer/:path*",
+		"/agentServer/:path*",
+		"/chatServer/:path*",
+		"/dashboard/:path*",
+	],
 };

@@ -5,7 +5,7 @@ const Dashboard = () => {
 	const [user, setUser] = useState<{ id: number; email: string }>();
 	useEffect(() => {
 		// fetch current user info
-		fetch("/api/proxy/authServer/users/me")
+		fetch("/authServer/users/me")
 			.then((res) => {
 				if (!res.ok) {
 					throw new Error("Failed to fetch user info");
