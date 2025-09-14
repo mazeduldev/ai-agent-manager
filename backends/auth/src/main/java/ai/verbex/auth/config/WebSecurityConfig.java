@@ -1,5 +1,6 @@
 package ai.verbex.auth.config;
 
+import ai.verbex.auth.filter.InternalServiceAuthFilter;
 import ai.verbex.auth.filter.JwtAuthFilter;
 import ai.verbex.auth.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class WebSecurityConfig {
     private JwtAuthFilter jwtAuthFilter;
 
     @Autowired
+    private InternalServiceAuthFilter internalServiceAuthFilter;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Bean
@@ -36,10 +40,12 @@ public class WebSecurityConfig {
                         -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/signup", "/auth/login", "/auth/refresh").permitAll()
+                        .requestMatchers("/internal/**").permitAll() // Internal API secured by InternalServiceAuthFilter
                         .anyRequest().authenticated()
                 )
                 .authenticationManager(authenticationManager(httpSecurity))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(internalServiceAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthFilter, InternalServiceAuthFilter.class)
                 .build();
     }
 

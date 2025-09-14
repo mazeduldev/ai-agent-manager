@@ -1,6 +1,7 @@
 package ai.verbex.auth.service;
 
 import ai.verbex.auth.dto.ApiKeyResponse;
+import ai.verbex.auth.dto.UserResponse;
 import ai.verbex.auth.exception.DuplicateApiKeyException;
 import ai.verbex.auth.model.ApiKey;
 import ai.verbex.auth.model.User;
@@ -78,6 +79,17 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+    public UserResponse verifyApiKey(String apiKey) {
+        String apiKeyPrefix = apiKey.substring(0, 10);
+        ApiKey storedApiKey = apiKeyRepository.findByApiKeyPrefix(apiKeyPrefix).orElse(null);
+        log.debug("Verifying API key with prefix: {}", apiKeyPrefix);
+        log.debug("Stored API key found: {}", storedApiKey != null);
+        if (storedApiKey == null || !passwordEncoder.matches(apiKey, storedApiKey.getApiKeyHash())) {
+            return null;
+        }
+        return mapToUserResponse(storedApiKey.getUser());
+    }
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
@@ -87,5 +99,9 @@ public class UserService implements UserDetailsService {
                 .username(user.getEmail())
                 .password(user.getPasswordHash())
                 .build();
+    }
+
+    private UserResponse mapToUserResponse(User user) {
+        return new UserResponse(user.getId(), user.getEmail());
     }
 }

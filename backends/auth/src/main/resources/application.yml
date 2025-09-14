@@ -23,6 +23,9 @@ jwt:
   expiration: 900000  # 15 minutes
   refreshExpiration: 604800000  # 7 days
 
+internal:
+  api-key: ${INTERNAL_API_KEY}
+
 logging:
   level:
     org.springframework: INFO

@@ -3,7 +3,6 @@ package ai.verbex.auth.controller;
 import ai.verbex.auth.dto.ApiKeyResponse;
 import ai.verbex.auth.dto.UserResponse;
 import ai.verbex.auth.model.User;
-import ai.verbex.auth.service.JwtService;
 import ai.verbex.auth.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +19,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private JwtService jwtService;
 
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getMyProfile(Principal principal) {
