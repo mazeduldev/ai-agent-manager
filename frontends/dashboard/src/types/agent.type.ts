@@ -9,17 +9,9 @@ export interface AgentDto {
 	updatedAt: Date;
 }
 
-export interface CreateAgentRequest {
+export interface CreateOrUpdateAgentRequest {
 	name: string;
 	systemPrompt: string;
 	temperature: number;
-	webhookUrl?: string;
-}
-
-export interface UpdateAgentRequest {
-	id: string;
-	name?: string;
-	systemPrompt?: string;
-	temperature?: number;
 	webhookUrl?: string;
 }

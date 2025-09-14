@@ -19,13 +19,13 @@ import {
 	Copy,
 } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
 import type { AgentDto } from "@/types/agent.type";
 
 interface AgentCardProps {
 	agent: AgentDto;
 	onPublicChat?: (agentId: string) => void;
 	onConversationHistory?: (agentId: string) => void;
-	onEditWebhook?: (agentId: string) => void;
 	onDeleteAgent?: (agentId: string) => void;
 }
 
@@ -33,7 +33,6 @@ export const AgentCard: React.FC<AgentCardProps> = ({
 	agent,
 	onPublicChat,
 	onConversationHistory,
-	onEditWebhook,
 	onDeleteAgent,
 }) => {
 	const copyWebhookUrl = async () => {
@@ -70,7 +69,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({
 				</CardDescription>
 			</CardHeader>
 
-			<div className="flex-1" />
+			<div className="" />
 
 			<CardContent className="flex-1 pt-0">
 				<div className="space-y-2">
@@ -120,15 +119,16 @@ export const AgentCard: React.FC<AgentCardProps> = ({
 						History
 					</Button>
 
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => onEditWebhook?.(agent.id)}
-						className="flex items-center gap-2 border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300"
-					>
-						<Webhook className="h-4 w-4" />
-						Edit
-					</Button>
+					<Link href={`/dashboard/agents/edit/${agent.id}`} className="w-full">
+						<Button
+							variant="outline"
+							size="sm"
+							className="flex items-center gap-2 border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 w-full"
+						>
+							<Webhook className="h-4 w-4" />
+							Edit
+						</Button>
+					</Link>
 
 					<Button
 						variant="outline"
