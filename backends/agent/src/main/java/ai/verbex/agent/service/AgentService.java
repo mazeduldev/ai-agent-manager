@@ -5,6 +5,7 @@ import ai.verbex.agent.dto.UpdateAgentRequest;
 import ai.verbex.agent.exception.NotFoundException;
 import ai.verbex.agent.model.Agent;
 import ai.verbex.agent.repository.AgentRepository;
+import ai.verbex.agent.webclient.ChatServerClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,9 @@ public class AgentService {
 
     @Autowired
     private AgentRepository agentRepository;
+
+    @Autowired
+    private ChatServerClient chatServerClient;
 
     public Agent createAgent(CreateAgentRequest request, String userId) {
         Agent agent = Agent.builder()
@@ -49,12 +53,12 @@ public class AgentService {
         return agentRepository.save(agent);
     }
 
-    public void deleteAgent(String id, String userId) {
-        Agent agent = getAgentById(id);
+    public void deleteAgent(String agentId, String userId) {
+        Agent agent = getAgentById(agentId);
         if (!agent.getUserId().equals(userId)) {
             throw new AccessDeniedException("You do not have permission to delete this agent");
         }
-        // todo: delete related conversations and messages first
-        agentRepository.deleteById(id);
+        chatServerClient.deleteAllConversationsByAgentId(agentId);
+        agentRepository.deleteById(agentId);
     }
 }

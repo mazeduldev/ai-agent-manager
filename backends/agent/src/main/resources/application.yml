@@ -22,6 +22,7 @@ jwt:
 
 internal:
   api-key: ${INTERNAL_API_KEY}
+  chat-server-url: ${CHAT_SERVER_URL:http://localhost:8200}
 
 logging:
   level:
