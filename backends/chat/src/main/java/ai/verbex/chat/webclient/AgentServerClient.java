@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "agent-server", url = "${internal.agent-server-url}", configuration = InternalFeignClientConfig.class)
 public interface AgentServerClient {
 
-    @GetMapping("/agents/{agentId}")
+    @GetMapping("/internal/agents/{agentId}")
     AgentDto getAgentById(@PathVariable("agentId") String agentId);
 }
