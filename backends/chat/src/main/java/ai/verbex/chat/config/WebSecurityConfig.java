@@ -1,5 +1,6 @@
 package ai.verbex.chat.config;
 
+import ai.verbex.chat.filter.InternalServiceAuthFilter;
 import ai.verbex.chat.filter.JwtAuthFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,15 +16,20 @@ public class WebSecurityConfig {
     @Autowired
     private JwtAuthFilter jwtAuthFilter;
 
+    @Autowired
+    private InternalServiceAuthFilter internalServiceAuthFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/chat/**").permitAll()
+                        .requestMatchers("/internal/**").permitAll() // Internal API secured by InternalServiceAuthFilter
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(internalServiceAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthFilter, InternalServiceAuthFilter.class)
                 .build();
     }
 }

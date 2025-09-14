@@ -27,6 +27,12 @@ public class ConversationService {
         return conversation.orElse(null);
     }
 
+    public void deleteAllConversationsByAgentId(String agentId) {
+        List<Conversation> conversations = conversationRepository.findByAgentId(agentId);
+        conversationRepository.deleteAll(conversations);
+        log.info("Deleted {} conversations for agentId: {}", conversations.size(), agentId);
+    }
+
     private ConversationDto convertToDto(Conversation conversation) {
         return new ConversationDto(
                 conversation.getId(),
