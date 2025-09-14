@@ -11,9 +11,9 @@ export type TokenResponse = {
 	refresh_token: string;
 	access_token_expires_in: number;
 	refresh_token_expires_in: number;
-	user: User;
+	user: UserDto;
 };
-export type User = {
-	id: number;
+export type UserDto = {
+	id: string;
 	email: string;
 };
