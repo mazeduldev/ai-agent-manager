@@ -5,7 +5,6 @@ import ai.verbex.agent.filter.JwtAuthFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -27,7 +26,7 @@ public class WebSecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/agents/*").permitAll()
+                        .requestMatchers("/internal/**").permitAll() // Internal API secured by InternalServiceAuthFilter
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(internalServiceAuthFilter, UsernamePasswordAuthenticationFilter.class)

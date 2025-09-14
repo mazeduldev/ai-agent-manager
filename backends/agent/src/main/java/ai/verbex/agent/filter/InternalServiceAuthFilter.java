@@ -5,7 +5,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -22,16 +21,16 @@ public class InternalServiceAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        if (request.getMethod().equals("GET") && request.getRequestURI().startsWith("/agents/")) {
-            // Skip API key check if already authenticated (e.g., by JWT)
-            if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                String apiKey = request.getHeader(INTERNAL_API_KEY_HEADER);
-                if (!EXPECTED_API_KEY.equals(apiKey)) {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    return;
-                }
+
+        if (request.getRequestURI().startsWith("/internal/")) {
+            String apiKey = request.getHeader(INTERNAL_API_KEY_HEADER);
+            if (!EXPECTED_API_KEY.equals(apiKey)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
             }
+
         }
+
         filterChain.doFilter(request, response);
     }
 
