@@ -13,6 +13,85 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d verbex"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth-server:
+    build:
+      context: ./backends/auth
+    restart: unless-stopped
+    env_file:
+      - ./backends/auth/.env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/verbex
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  agent-server:
+    build:
+      context: ./backends/agent
+    restart: unless-stopped
+    env_file:
+      - ./backends/agent/.env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/verbex
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "8100:8100"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      # - chat-server
+
+  chat-server:
+    build:
+      context: ./backends/chat
+    restart: unless-stopped
+    env_file:
+      - ./backends/chat/.env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/verbex
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "8200:8200"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  dashboard:
+    build:
+      context: ./frontends/dashboard
+    restart: unless-stopped
+    env_file:
+      - ./frontends/dashboard/.env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-server
+      - agent-server
+      - chat-server
+
+  chatbox:
+    build:
+      context: ./frontends/chatbox
+    restart: unless-stopped
+    env_file:
+      - ./frontends/chatbox/.env
+    ports:
+      - "4000:4000"
+    depends_on:
+      - chat-server
+      - agent-server
 
 volumes:
   pgdata:

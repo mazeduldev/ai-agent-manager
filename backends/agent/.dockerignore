@@ -1,0 +1,28 @@
+# .dockerignore for Spring Boot applications
+
+# Git files
+.git
+.gitignore
+
+# IDE and OS specific files
+.idea/
+*.iml
+*.iws
+.classpath
+.project
+.settings/
+.DS_Store
+
+# Maven build output
+target/
+
+# Log files
+*.log
+
+# Maven wrapper (not needed in build container)
+mvnw
+mvnw.cmd
+.mvn/
+
+# Local environment files
+.env

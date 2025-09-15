@@ -1,0 +1,29 @@
+# .dockerignore for Next.js applications
+
+# Git files
+.git
+.gitignore
+
+# Dependency directory
+node_modules
+
+# Next.js build output
+.next/
+
+# Local environment variables
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS-specific files
+.DS_Store
+
+# Turbopack cache
+.turbo
+
+# Biome (or other linter/formatter) cache
+.biome/
