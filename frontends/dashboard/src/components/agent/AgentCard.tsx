@@ -130,15 +130,19 @@ export const AgentCard: React.FC<AgentCardProps> = ({
 							<ExternalLink className="h-3 w-3" />
 						</Button>
 
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => onConversationHistory?.(agent.id)}
-							className="flex items-center gap-2 border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300"
+						<Link
+							href={`/dashboard/agents/${agent.id}/conversations`}
+							className="w-full"
 						>
-							<History className="h-4 w-4" />
-							History
-						</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								className="flex items-center gap-2 border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 w-full"
+							>
+								<History className="h-4 w-4" />
+								History
+							</Button>
+						</Link>
 
 						<Link
 							href={`/dashboard/agents/edit/${agent.id}`}
