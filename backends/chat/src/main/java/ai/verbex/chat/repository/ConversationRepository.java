@@ -29,6 +29,16 @@ public interface ConversationRepository extends JpaRepository<Conversation, Stri
             """)
     List<ConversationSummary> findConversationSummariesByAgentId(@Param("agentId") String agentId);
 
+    @Query("""
+            SELECT COUNT(DISTINCT c.id) as totalConversations,
+                   COUNT(m.id) as totalMessages,
+                   MAX(COALESCE(m.createdAt, c.startedAt)) as lastActivityTimestamp
+            FROM Conversation c
+            LEFT JOIN c.messages m
+            WHERE c.agentId = :agentId
+            """)
+    AgentAnalyticsSummary getAgentAnalytics(@Param("agentId") String agentId);
+
     interface ConversationSummary {
         String getConversationId();
 
@@ -43,5 +53,13 @@ public interface ConversationRepository extends JpaRepository<Conversation, Stri
         Long getMessageCount();
 
         LocalDateTime getLastMessageCreatedAt();
+    }
+
+    interface AgentAnalyticsSummary {
+        Long getTotalConversations();
+
+        Long getTotalMessages();
+
+        LocalDateTime getLastActivityTimestamp();
     }
 }
