@@ -135,29 +135,24 @@ export default function ChatPage({
 
           // Parse Server-Sent Events format
           if (line.startsWith("data:")) {
-            // const eventMatch = line.match(/^event:\s*(.+)$/);
-            const dataMatch = line.match(/^data:\s*(.+)$/);
+            try {
+              const jsonStr = line.substring(5).trim(); // Remove "data:" prefix
+              const eventData: ChatEvent = JSON.parse(jsonStr);
 
-            if (dataMatch) {
-              try {
-                const eventData: ChatEvent = JSON.parse(dataMatch[1]);
-
-                if (eventData.conversationId && !currentConversationId) {
-                  currentConversationId = eventData.conversationId;
-                  // setConversationId(eventData.conversationId);
-                }
-
-                // Handle init event (empty chunk)
-                if (eventData.chunk === "") {
-                  continue;
-                }
-
-                // Handle message events (append chunks)
-                agentResponseText += eventData.chunk;
-                setStreamingMessage(agentResponseText);
-              } catch (error) {
-                console.error("Error parsing event data:", error);
+              if (!currentConversationId && eventData.conversationId) {
+                currentConversationId = eventData.conversationId;
               }
+
+              // Handle init event (empty chunk)
+              if (eventData.chunk === "") {
+                continue;
+              }
+
+              // Handle message events (append chunks)
+              agentResponseText += eventData.chunk;
+              setStreamingMessage(agentResponseText);
+            } catch (error) {
+              console.error("Error parsing event data:", error);
             }
           }
         }
