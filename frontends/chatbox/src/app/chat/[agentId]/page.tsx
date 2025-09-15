@@ -130,7 +130,7 @@ export default function ChatPage({params}: {params: Promise<{agentId: string}>})
 
                 if (eventData.conversationId && !currentConversationId) {
                   currentConversationId = eventData.conversationId;
-                  setConversationId(eventData.conversationId);
+                  // setConversationId(eventData.conversationId);
                 }
 
                 // Handle init event (empty chunk)
@@ -159,6 +159,7 @@ export default function ChatPage({params}: {params: Promise<{agentId: string}>})
           timestamp: new Date(),
         };
 
+				setConversationId(currentConversationId || null);
         setMessages(prev => [...prev, agentMessage]);
       }
 
@@ -237,7 +238,7 @@ export default function ChatPage({params}: {params: Promise<{agentId: string}>})
         ))}
 
         {/* Streaming message */}
-        {streamingMessage && (
+        {(streamingMessage || isLoading) && (
           <div className="flex justify-start">
             <div className="max-w-[70%] p-3 rounded-lg bg-gray-100 text-gray-800">
               <p className="whitespace-pre-wrap">{streamingMessage}</p>
