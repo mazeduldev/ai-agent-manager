@@ -179,7 +179,7 @@ const ConversationsPage = ({ params }: { params: Promise<{ id: string }> }) => {
 														"max-w-[70%] rounded-lg px-3 py-2 text-sm",
 														message.role === "ASSISTANT"
 															? "bg-muted text-foreground"
-															: "bg-primary text-primary-foreground",
+															: "bg-slate-600 text-white",
 													)}
 												>
 													<p className="whitespace-pre-wrap">
@@ -190,7 +190,7 @@ const ConversationsPage = ({ params }: { params: Promise<{ id: string }> }) => {
 															"text-xs mt-1 opacity-70",
 															message.role === "ASSISTANT"
 																? "text-muted-foreground"
-																: "text-primary-foreground/70",
+																: "text-white/70",
 														)}
 													>
 														{formatTime(message.createdAt)}
