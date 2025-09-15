@@ -27,9 +27,6 @@ public class Conversation {
     @Column(name = "first_message_snippet", length = 255, nullable = false)
     private String firstMessageSnippet;
 
-    @Column(name = "message_count", nullable = false)
-    private Integer messageCount = 0;
-
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<Message> messages;
 
@@ -45,7 +42,6 @@ public class Conversation {
         this.id = c.id;
         this.agentId = c.agentId;
         this.firstMessageSnippet = c.firstMessageSnippet;
-        this.messageCount = c.messageCount;
         this.messages = c.messages;
         this.startedAt = c.startedAt;
         this.endedAt = c.endedAt;

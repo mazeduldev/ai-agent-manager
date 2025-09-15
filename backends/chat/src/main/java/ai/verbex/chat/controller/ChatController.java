@@ -37,7 +37,7 @@ public class ChatController {
             conversation = new Conversation();
             conversation.setAgentId(agentDto.getId());
             conversation.setFirstMessageSnippet(req.message());
-            conversation.setMessageCount(0);
+            // messageCount removed - will be calculated dynamically
             conversation = chatService.saveConversation(conversation);
 
             // Call webhook for new conversation
@@ -90,7 +90,7 @@ public class ChatController {
                     String full = collected.get().toString();
                     if (!full.isBlank()) {
                         Conversation updatedConversation = new Conversation(finalConversation);
-                        updatedConversation.setMessageCount(finalConversation.getMessageCount() + 2); // user + assistant
+                        // messageCount removed - will be calculated dynamically when needed
                         updatedConversation = chatService.saveConversation(updatedConversation);
 
                         Message assistantMsg = new Message();

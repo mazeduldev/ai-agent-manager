@@ -7,9 +7,10 @@ public record ConversationDto(
         String id,
         String agentId,
         String firstMessageSnippet,
-        Integer messageCount,
+        Long messageCount,
         List<String> messageIds,
         LocalDateTime startedAt,
-        LocalDateTime endedAt
+        LocalDateTime endedAt,
+        LocalDateTime lastMessageCreatedAt
 ) {
 }

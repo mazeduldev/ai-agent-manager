@@ -18,8 +18,12 @@ public class ConversationService {
     private final ConversationRepository conversationRepository;
 
     public List<ConversationDto> listConversationsByAgentId(String agentId) {
-        List<Conversation> conversationList = conversationRepository.findByAgentId(agentId);
-        return conversationList.stream().map(this::convertToDto).toList();
+        List<ConversationRepository.ConversationSummary> summaries =
+                conversationRepository.findConversationSummariesByAgentId(agentId);
+
+        return summaries.stream()
+                .map(this::convertSummaryToDto)
+                .toList();
     }
 
     public Conversation getConversationById(String conversationId) {
@@ -33,15 +37,16 @@ public class ConversationService {
         log.info("Deleted {} conversations for agentId: {}", conversations.size(), agentId);
     }
 
-    private ConversationDto convertToDto(Conversation conversation) {
+    private ConversationDto convertSummaryToDto(ConversationRepository.ConversationSummary summary) {
         return new ConversationDto(
-                conversation.getId(),
-                conversation.getAgentId(),
-                conversation.getFirstMessageSnippet(),
-                conversation.getMessageCount(),
-                null,
-                conversation.getStartedAt(),
-                conversation.getEndedAt()
+                summary.getConversationId(),
+                summary.getAgentId(),
+                summary.getFirstMessageSnippet(),
+                summary.getMessageCount(),
+                null, // messageIds - not needed for listing
+                summary.getStartedAt(),
+                summary.getEndedAt(),
+                summary.getLastMessageCreatedAt()
         );
     }
 }
