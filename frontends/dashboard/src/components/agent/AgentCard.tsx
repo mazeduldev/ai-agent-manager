@@ -28,13 +28,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 interface AgentCardProps {
 	agent: AgentDto;
 	onPublicChat?: (agentId: string) => void;
-	onConversationHistory?: (agentId: string) => void;
 }
 
 export const AgentCard: React.FC<AgentCardProps> = ({
 	agent,
 	onPublicChat,
-	onConversationHistory,
 }) => {
 	const queryClient = useQueryClient();
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -119,16 +117,22 @@ export const AgentCard: React.FC<AgentCardProps> = ({
 
 				<CardFooter className="pt-4">
 					<div className="grid grid-cols-2 gap-2 w-full">
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => onPublicChat?.(agent.id)}
-							className="flex items-center gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300"
+						<a
+							href={`${process.env.NEXT_PUBLIC_CHAT_CLIENT_URL}/chat/${agent.id}`}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="w-full"
 						>
-							<MessageCircle className="h-4 w-4" />
-							Public Chat
-							<ExternalLink className="h-3 w-3" />
-						</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								className="flex items-center gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 w-full"
+							>
+								<MessageCircle className="h-4 w-4" />
+								Public Chat
+								<ExternalLink className="h-3 w-3" />
+							</Button>
+						</a>
 
 						<Link
 							href={`/dashboard/agents/${agent.id}/conversations`}
