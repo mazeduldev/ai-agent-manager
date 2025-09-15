@@ -108,20 +108,26 @@ export default function ChatPage({params}: {params: Promise<{agentId: string}>})
       const decoder = new TextDecoder();
       let agentResponseText = '';
       let currentConversationId = conversationId;
+			let buffer = ''; // Buffer for incomplete lines
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
+				buffer += chunk;
+
+				// Split by newlines but keep the last incomplete line in buffer
+        const lines = buffer.split('\n');
+				buffer = lines.pop() ?? ""; // Keep the last (potentially incomplete) line in buffer
+				console.log("Lines:", lines);
 
         for (const line of lines) {
           if (line.trim() === '') continue;
 
           // Parse Server-Sent Events format
-          if (line.startsWith('event:') || line.startsWith('data:')) {
-            const eventMatch = line.match(/^event:\s*(.+)$/);
+          if (line.startsWith('data:')) {
+            // const eventMatch = line.match(/^event:\s*(.+)$/);
             const dataMatch = line.match(/^data:\s*(.+)$/);
 
             if (dataMatch) {
@@ -140,13 +146,28 @@ export default function ChatPage({params}: {params: Promise<{agentId: string}>})
 
                 // Handle message events (append chunks)
                 agentResponseText += eventData.chunk;
-                setStreamingMessage(agentResponseText);
+								setStreamingMessage(agentResponseText);
 
               } catch (error) {
                 console.error('Error parsing event data:', error);
               }
             }
           }
+        }
+      }
+
+			// Process any remaining data in buffer
+      if (buffer.trim() && buffer.startsWith('data:')) {
+        try {
+          const jsonStr = buffer.substring(5).trim(); // Remove "data:" prefix
+          const eventData: ChatEvent = JSON.parse(jsonStr);
+
+          if (eventData.chunk) {
+            agentResponseText += eventData.chunk;
+            setStreamingMessage(agentResponseText);
+          }
+        } catch (error) {
+          console.error('Error parsing final buffer data:', error);
         }
       }
 
@@ -268,7 +289,7 @@ export default function ChatPage({params}: {params: Promise<{agentId: string}>})
             disabled={isLoading}
             className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
           />
-          
+
           {isLoading ? (
             <button
               type="button"
