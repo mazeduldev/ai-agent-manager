@@ -2,6 +2,10 @@
 
 Verbex is a full-stack application designed to provide a seamless platform to build, monitor, and scale AI agents. It features a command center dashboard, multiple backend microservices, and a complete containerized setup for easy deployment.
 
+## Demo video
+
+https://www.loom.com/share/f6d9d35cd1aa47be9a7add68aaa5cb5a?sid=077f3ea8-6ebb-493a-9bd3-49e474a40157
+
 ## Architecture
 
 The application is built on a microservices architecture, with Next.js frontends and Spring Boot backends, all containerized with Docker.
