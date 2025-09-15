@@ -6,6 +6,7 @@ Verbex is a full-stack application designed to provide a seamless platform to bu
 
 The application is built on a microservices architecture, with Next.js frontends and Spring Boot backends, all containerized with Docker.
 
+![Architecture diagram](https://github.com/mazeduldev/ai-agent-manager/blob/main/ai-agent-manager.jpg)
 
 ## Local Development Setup
 Follow these steps to run the entire application stack on your local machine.
