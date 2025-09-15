@@ -1,54 +1,87 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { AgentDto } from "@/types/agent.type";
 
-type Agent = {
-  id: string;
-  name: string;
+type AgentAnalytics = {
+  agentId: string;
   totalConversations: number;
   totalMessages: number;
-  lastActivity: string;
+  lastActivityTimestamp: string;
 };
 
 const AnalyticsPage = () => {
-  const [agents, setAgents] = useState<Agent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchAgentAnalytics = async () => {
-      try {
-        const response = await fetch("/agentServer/agents");
-        if (!response.ok) {
-          throw new Error("Failed to fetch agent data");
-        }
-        const data = await response.json();
-        setAgents(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-      } finally {
-        setLoading(false);
+  const {
+    data: agents,
+    isLoading: agentsLoading,
+    isError: agentsError,
+  } = useQuery({
+    queryKey: ["agents"],
+    queryFn: async (): Promise<AgentDto[]> => {
+      const response = await fetch("/agentServer/agents");
+      if (!response.ok) {
+        throw new Error("Could not fetch agents");
       }
-    };
+      return response.json();
+    },
+  });
 
-    fetchAgentAnalytics();
-  }, []);
+  const {
+    data: analyticsData,
+    isLoading: analyticsLoading,
+    isError: analyticsError,
+  } = useQuery({
+    queryKey: ["analytics", agents?.map((agent) => agent.id)],
+    queryFn: async (): Promise<AgentAnalytics[]> => {
+      if (!agents) return [];
+
+      const analyticsPromises = agents.map(async (agent) => {
+        const response = await fetch(
+          `/chatServer/analytics/agents/${agent.id}`,
+        );
+        if (!response.ok) {
+          throw new Error(`Could not fetch analytics for agent ${agent.id}`);
+        }
+        return response.json();
+      });
+
+      return Promise.all(analyticsPromises);
+    },
+    enabled: !!agents && agents.length > 0,
+  });
 
   const formatLastActivity = (timestamp: string) => {
+    if (!timestamp) return "No activity";
     const date = new Date(timestamp);
     return date.toLocaleString();
   };
 
   const getTotalConversations = () => {
-    return agents.reduce((total, agent) => total + agent.totalConversations, 0);
+    return (
+      analyticsData?.reduce(
+        (total, analytics) => total + analytics.totalConversations,
+        0,
+      ) || 0
+    );
   };
 
   const getTotalMessages = () => {
-    return agents.reduce((total, agent) => total + agent.totalMessages, 0);
+    return (
+      analyticsData?.reduce(
+        (total, analytics) => total + analytics.totalMessages,
+        0,
+      ) || 0
+    );
   };
 
-  if (loading) {
+  const getAgentName = (agentId: string) => {
+    return (
+      agents?.find((agent) => agent.id === agentId)?.name || "Unknown Agent"
+    );
+  };
+
+  if (agentsLoading || analyticsLoading) {
     return (
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-6">Analytics</h1>
@@ -57,11 +90,13 @@ const AnalyticsPage = () => {
     );
   }
 
-  if (error) {
+  if (agentsError || analyticsError) {
     return (
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-6">Analytics</h1>
-        <div className="text-center text-red-500">Error: {error}</div>
+        <div className="text-center text-red-500">
+          Error loading analytics data
+        </div>
       </div>
     );
   }
@@ -77,7 +112,7 @@ const AnalyticsPage = () => {
             <CardTitle className="text-sm font-medium">Total Agents</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{agents.length}</div>
+            <div className="text-2xl font-bold">{agents?.length || 0}</div>
           </CardContent>
         </Card>
 
@@ -110,9 +145,9 @@ const AnalyticsPage = () => {
           <CardTitle>Agent Analytics</CardTitle>
         </CardHeader>
         <CardContent>
-          {agents.length === 0 ? (
+          {!analyticsData || analyticsData.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              No agents found
+              No analytics data available
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -126,15 +161,20 @@ const AnalyticsPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {agents.map((agent) => (
-                    <tr key={agent.id} className="border-b hover:bg-gray-50">
-                      <td className="py-3 px-4 font-medium">{agent.name}</td>
-                      <td className="py-3 px-4">{agent.totalConversations}</td>
-                      <td className="py-3 px-4">{agent.totalMessages}</td>
+                  {analyticsData.map((analytics) => (
+                    <tr
+                      key={analytics.agentId}
+                      className="border-b hover:bg-gray-50"
+                    >
+                      <td className="py-3 px-4 font-medium">
+                        {getAgentName(analytics.agentId)}
+                      </td>
                       <td className="py-3 px-4">
-                        {agent.lastActivity
-                          ? formatLastActivity(agent.lastActivity)
-                          : "No activity"}
+                        {analytics.totalConversations}
+                      </td>
+                      <td className="py-3 px-4">{analytics.totalMessages}</td>
+                      <td className="py-3 px-4">
+                        {formatLastActivity(analytics.lastActivityTimestamp)}
                       </td>
                     </tr>
                   ))}
