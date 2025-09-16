@@ -12,7 +12,35 @@ The application is built on a microservices architecture, with Next.js frontends
 
 ![Architecture diagram](https://github.com/mazeduldev/ai-agent-manager/blob/main/ai-agent-manager.jpg)
 
-## Local Development Setup
+### Backend Architecture
+The backend consists of 4 main microservices:
+
+1. **Auth Service** - Authentication & user management
+2. **Agent Service** - AI agent CRUD operations
+3. **Chat Service** - Chat & LLM integration
+4. **Analytics Service** - Conversation tracking & metrics (*Not implemented yet. But this functionality is integrated into `Chat Service` for now. I'll separate this functionality into a dedicated microservice later.*)
+
+### Frontend Architecture
+The frontend consists of 2 individually deployable Next.js projects.
+
+1. **Dashboard** - Landing page, authentication, admin functionality, analytics view.
+2. **Chatbox** - Literally the embeddable chat UI only.
+
+### API Gateway Layer
+Initially I had a plan to implement Spring Cloud Gateway. But I choose to not doing that. Instead I took leverage of having built-in backend of Next.js projects. Next.js backend is essentially performing the API gateway tasks. Let me explain with some examples.
+
+1. **Routing requests** - I've given individual names to my backend servers, for example *authServer*, *agentServer*, *chatServer*, etc. Then the communication flow happens step by step like this.
+    - From the client side when I send a request to the backend, I attach one of these names as a prefix of the path.
+    For example: *http://dashboard-app:3000/authServer/auth/login*
+    - Next.js middleware (runs securely in backend) forward the request to intended server based on the prefix.
+    For example the request in the previous step will be translated and forwarded to: *http://auth-server:8080/auth/login*
+2. **Authentication & Refresh token**
+    - When users' login request succeeded, the *Auth Server* returns `access_token` and `refresh_token` in the body of the response.
+    - Next.js middleware intercepts the response and construct a new response with `Set-Cookie` headers to set secure http-only cookies for the `access_token` and `refresh_token`. Therefore the client side in the browser gets secure tokens inaccessible by javascript, and ensured strong security against hackers.
+    - When an authenticated request flows from client to server, same as before the middleware intercepts and move the tokens from cookie to `Authorization` header as a `Bearer` token.
+    - Middleware also handle refresh token strategy for a request that is rejected with 401 or 403 response status.
+
+## Run the Production build locally
 Follow these steps to run the entire application stack on your local machine.
 
 ### Prerequisites
@@ -20,37 +48,33 @@ Follow these steps to run the entire application stack on your local machine.
 - Docker Compose
 
 ### Step-by-step Instructions
-1. Clone the Repository
+1. Clone the Repository.
 ```bash
 git clone https://github.com/mazeduldev/ai-agent-manager.git
 ```
 
-2. Configure Root Environment
-Rename `.env.example` file in the root to `.env`
+2. Configure Root environment. Rename `.env.example` file in the root to `.env`
 
-3. Configure Frontend Environment
-Frontend projects are at `/frontends/dashboard` and `/frontends/chatbox` both have `.env.example` files. Rename them to `.env`
+3. Configure Frontend environment. Frontend projects are at `/frontends/dashboard` and `/frontends/chatbox` both have `.env.example` files. Rename them to `.env`
 
-4. Do the same for backend projects under `/backends/*` directories.
+4. Configure Backend environment. Backend projects are at `/backends/auth`, `/backends/agent`, and `/backends/chat` directories. All of them have `.env.example` files. Rename them to `.env`
+
+5. **Very Important: you must provide your own OpenAI API Key.**
+Following file requires OpenAI API Key. I'm not providing my one here :)
 ```
 /backends/chat/.env
-This file require you OpenAI API Key.
-I'm not providing my one here :)
 ```
 
-5. Build and Run with Docker Compose
-From the root directory, run the following command.
+6. Build and Run with Docker Compose. From the root directory, run the following command.
 ```bash
 docker-compose up --build
 ```
-This will build all the service images and start the containers.
+This will build all the service images similar to a production build and start the containers.
 
-6. Access the Applications
-Once all containers are running, you can access the services at:
-
-- Dashboard: http://localhost:3000
-- Chatbox: http://localhost:4000/chat/{agentId}
-- Database (PostgreSQL): Connect via port 5432
+7. Access the Applications. Once all containers are running, you can access the services at:
+    - Dashboard: http://localhost:3000
+    - Chatbox: http://localhost:4000/chat/{agentId}
+    - Database (PostgreSQL): Connect via port 5432
 
 ## API Documentation
 Here are some of the key API endpoints available.
