@@ -1,24 +1,21 @@
-# Stage 1: Build the application
-FROM maven:3.9-eclipse-temurin-17 AS build
+# Use a base image with Maven and JDK
+FROM maven:3.9-eclipse-temurin-17 AS development
+
 WORKDIR /app
 
-# Copy pom.xml and download dependencies to leverage Docker cache
-COPY pom.xml .
-RUN mvn dependency:go-offline
+# Copy the Maven wrapper and pom.xml
+COPY .mvn/ .mvn
+COPY mvnw pom.xml ./
 
-# Copy the rest of the source code and build the application
+# Download dependencies to leverage Docker cache
+RUN ./mvnw dependency:go-offline
+
+# Copy the rest of your application's source code
 COPY src ./src
-RUN mvn package -DskipTests
 
-# Stage 2: Create the final, smaller image
-FROM eclipse-temurin:17-jre-jammy
-WORKDIR /app
-
-# Copy the built JAR from the build stage
-COPY --from=build /app/target/agent-0.0.1-SNAPSHOT.jar app.jar
-
-# Expose the port the application runs on
+# Expose the application port
 EXPOSE 8100
 
-# Command to run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Command to run the app in development mode with debugging enabled
+# This command will automatically recompile and reload on file changes.
+CMD ["./mvnw", "spring-boot:run", "-Dspring-boot.run.jvmArguments=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"]

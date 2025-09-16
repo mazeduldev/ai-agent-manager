@@ -1,16 +1,14 @@
 version: '3.9'
 
 services:
-  # --- DATABASE (Same as production) ---
   postgres:
     image: postgres:17
     container_name: verbex-pg17
     restart: unless-stopped
-    env_file: .env
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=verbex
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: verbex
     ports:
       - "5432:5432"
     volumes:
@@ -21,20 +19,19 @@ services:
       timeout: 5s
       retries: 5
 
-  # --- BACKEND SERVICES (with Hot-Reloading) ---
   auth-server:
     build:
       context: ./backends/auth
-    ports:
-      - "8080:8080" # App port
-      - "5005:5005" # Debug port
-    volumes:
-      - ./backends/auth:/app # Mount source code
-    env_file: ./backends/auth/.env
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    env_file:
+      - ./backends/auth/.env
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/verbex
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -42,48 +39,47 @@ services:
   agent-server:
     build:
       context: ./backends/agent
-    ports:
-      - "8100:8100" # App port
-      - "5006:5005" # Debug port
-    volumes:
-      - ./backends/agent:/app # Mount source code
-    env_file: ./backends/agent/.env
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    env_file:
+      - ./backends/agent/.env
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/verbex
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "8100:8100"
     depends_on:
       postgres:
         condition: service_healthy
+      # - chat-server
 
   chat-server:
     build:
       context: ./backends/chat
-    ports:
-      - "8200:8200" # App port
-      - "5007:5005" # Debug port
-    volumes:
-      - ./backends/chat:/app # Mount source code
-    env_file: ./backends/chat/.env
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    env_file:
+      - ./backends/chat/.env
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/verbex
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "8200:8200"
     depends_on:
       postgres:
         condition: service_healthy
 
-  # --- FRONTEND SERVICES (with Hot-Reloading) ---
   dashboard:
     build:
       context: ./frontends/dashboard
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    env_file:
+      - ./frontends/dashboard/.env
     ports:
       - "3000:3000"
-    volumes:
-      - ./frontends/dashboard:/app # Mount source code
-      - /app/node_modules # Anonymous volume to prevent host node_modules from overwriting container's
-      - /app/.next
-    env_file: ./frontends/dashboard/.env
     depends_on:
       - auth-server
       - agent-server
@@ -92,15 +88,15 @@ services:
   chatbox:
     build:
       context: ./frontends/chatbox
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    env_file:
+      - ./frontends/chatbox/.env
     ports:
       - "4000:4000"
-    volumes:
-      - ./frontends/chatbox:/app # Mount source code
-      - /app/node_modules
-      - /app/.next
-    env_file: ./frontends/chatbox/.env
     depends_on:
-      - auth-server
+      - chat-server
+      - agent-server
 
 volumes:
   pgdata:
