@@ -40,7 +40,7 @@ Initially I had a plan to implement Spring Cloud Gateway. But I choose to not do
     - When an authenticated request flows from client to server, same as before the middleware intercepts and move the tokens from cookie to `Authorization` header as a `Bearer` token.
     - Middleware also handle refresh token strategy for a request that is rejected with 401 or 403 response status.
 
-## Run the Production build locally
+## Run locally for testing
 Follow these steps to run the entire application stack on your local machine.
 
 ### Prerequisites
@@ -67,7 +67,11 @@ Following file requires OpenAI API Key. I'm not providing my one here :)
 
 6. Build and Run with Docker Compose. From the root directory, run the following command.
 ```bash
+# run this command for dev build with hot reload and debug log
 docker-compose up --build
+
+# run this command for production build
+docker-compose -f docker-compose.prod.yml up --build
 ```
 This will build all the service images similar to a production build and start the containers.
 
