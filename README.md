@@ -80,6 +80,19 @@ This will build all the service images similar to a production build and start t
     - Chatbox: http://localhost:4000/chat/{agentId}
     - Database (PostgreSQL): Connect via port 5432
 
+
+## Run for Development and Contribution
+
+1. **Infrastructure**: I strongly suggest using docker-compose only for running the development infrastructure using the following command.
+
+    ```bash
+    docker-compose -f docker-compose.infra.yml up -d
+    ```
+
+2. **Backend Services**: Import backend Spring Boot projects individually into your preferred IDE for java. My recommendation goes for [Intellij IDEA](https://www.jetbrains.com/idea/). Then run with it's built-in application runner.
+
+3. **Frontend**: Any code editor with support for [Biome](https://biomejs.dev/) should work. I recommend using [vscode](https://code.visualstudio.com/) or [cursor](https://cursor.com/).
+
 ## API Documentation
 Here are some of the key API endpoints available.
 
