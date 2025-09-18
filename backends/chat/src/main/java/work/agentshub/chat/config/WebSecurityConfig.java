@@ -24,6 +24,7 @@ public class WebSecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/chat/**").permitAll()
                         .requestMatchers("/internal/**").permitAll() // Internal API secured by InternalServiceAuthFilter
                         .anyRequest().authenticated()
