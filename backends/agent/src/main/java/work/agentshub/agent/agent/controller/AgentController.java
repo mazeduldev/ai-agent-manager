@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import work.agentshub.agent.agent.dto.AgentDto;
 import work.agentshub.agent.agent.dto.CreateAgentRequest;
 import work.agentshub.agent.agent.dto.UpdateAgentRequest;
 import work.agentshub.agent.agent.model.Agent;
@@ -21,29 +22,33 @@ public class AgentController {
     private AgentService agentService;
 
     @PostMapping()
-    public ResponseEntity<Agent> createAgent(Principal principal, @Valid @RequestBody CreateAgentRequest request) {
-        Agent agent = agentService.createAgent(request, principal.getName());
-        return ResponseEntity.status(HttpStatus.CREATED).body(agent);
+    public ResponseEntity<AgentDto> createAgent(
+            Principal principal,
+            @Valid @RequestBody CreateAgentRequest request) {
+        AgentDto agentDto = agentService.createAgent(request, principal.getName()).toDto();
+        return ResponseEntity.status(HttpStatus.CREATED).body(agentDto);
     }
 
     @GetMapping()
-    public ResponseEntity<List<Agent>> listAgentsByUser(Principal principal) {
-        return ResponseEntity.ok(agentService.listAgentsByUserId(principal.getName()));
+    public ResponseEntity<List<AgentDto>> listAgentsByUser(Principal principal) {
+        return ResponseEntity.ok(
+                agentService.listAgentsByUserId(principal.getName())
+                        .stream().map(Agent::toDto).toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Agent> getAgentDetails(@PathVariable String id) {
+    public ResponseEntity<AgentDto> getAgentDetails(@PathVariable String id) {
         Agent agent = agentService.getAgentById(id);
-        return ResponseEntity.ok(agent);
+        return ResponseEntity.ok(agent.toDto());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Agent> updateAgent(
+    public ResponseEntity<AgentDto> updateAgent(
             @PathVariable String id,
             Principal principal,
             @Valid @RequestBody UpdateAgentRequest request) {
         Agent updated = agentService.updateAgent(id, principal.getName(), request);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(updated.toDto());
     }
 
     @DeleteMapping("/{id}")

@@ -38,7 +38,7 @@ public class AgentService {
 
     public Agent getAgentById(String id) {
         return agentRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Agent not found"));
+                .orElseThrow(() -> new NotFoundException("Agent not found with id: " + id));
     }
 
     public Agent updateAgent(String id, String userId, UpdateAgentRequest request) {

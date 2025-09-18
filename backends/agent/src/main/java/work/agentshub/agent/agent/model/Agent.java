@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import work.agentshub.agent.agent.dto.AgentDto;
 
 import java.time.LocalDateTime;
 
@@ -60,4 +61,16 @@ public class Agent {
     @UpdateTimestamp
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedAt;
+
+    public AgentDto toDto() {
+        return new AgentDto(
+                this.getId(),
+                this.getName(),
+                this.getSystemPrompt(),
+                this.getTemperature(),
+                this.getUserId(),
+                this.getCreatedAt() != null ? this.getCreatedAt().toString() : null,
+                this.getUpdatedAt() != null ? this.getUpdatedAt().toString() : null
+        );
+    }
 }

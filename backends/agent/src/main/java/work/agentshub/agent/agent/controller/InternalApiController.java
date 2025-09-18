@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import work.agentshub.agent.agent.dto.AgentDto;
 import work.agentshub.agent.agent.model.Agent;
 import work.agentshub.agent.agent.service.AgentService;
 
@@ -19,8 +20,8 @@ public class InternalApiController {
     private AgentService agentService;
 
     @GetMapping("/agents/{id}")
-    public ResponseEntity<Agent> getAgentDetails(@PathVariable String id) {
+    public ResponseEntity<AgentDto> getAgentDetails(@PathVariable String id) {
         Agent agent = agentService.getAgentById(id);
-        return ResponseEntity.ok(agent);
+        return ResponseEntity.ok(agent.toDto());
     }
 }
