@@ -1,7 +1,6 @@
 version: '3.9'
 
 services:
-  # --- DATABASE (Same as production) ---
   postgres:
     image: postgres:17
     container_name: verbex-pg17
@@ -15,92 +14,6 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d verbex"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # --- BACKEND SERVICES (with Hot-Reloading) ---
-  auth-server:
-    build:
-      context: ./backends/auth
-    ports:
-      - "8080:8080" # App port
-      - "5005:5005" # Debug port
-    volumes:
-      - ./backends/auth:/app # Mount source code
-    env_file: ./backends/auth/.env
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/verbex
-      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
-      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  agent-server:
-    build:
-      context: ./backends/agent
-    ports:
-      - "8100:8100" # App port
-      - "5006:5005" # Debug port
-    volumes:
-      - ./backends/agent:/app # Mount source code
-    env_file: ./backends/agent/.env
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/verbex
-      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
-      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  chat-server:
-    build:
-      context: ./backends/chat
-    ports:
-      - "8200:8200" # App port
-      - "5007:5005" # Debug port
-    volumes:
-      - ./backends/chat:/app # Mount source code
-    env_file: ./backends/chat/.env
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/verbex
-      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
-      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  # --- FRONTEND SERVICES (with Hot-Reloading) ---
-  dashboard:
-    build:
-      context: ./frontends/dashboard
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontends/dashboard:/app # Mount source code
-      - /app/node_modules # Anonymous volume to prevent host node_modules from overwriting container's
-      - /app/.next
-    env_file: ./frontends/dashboard/.env
-    depends_on:
-      - auth-server
-      - agent-server
-      - chat-server
-
-  chatbox:
-    build:
-      context: ./frontends/chatbox
-    ports:
-      - "4000:4000"
-    volumes:
-      - ./frontends/chatbox:/app # Mount source code
-      - /app/node_modules
-      - /app/.next
-    env_file: ./frontends/chatbox/.env
-    depends_on:
-      - auth-server
 
 volumes:
   pgdata:

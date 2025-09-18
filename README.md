@@ -41,41 +41,38 @@ Initially I had a plan to implement Spring Cloud Gateway. But I choose to not do
     - Middleware also handle refresh token strategy for a request that is rejected with 401 or 403 response status.
 
 ## Run locally for testing
-Follow these steps to run the entire application stack on your local machine.
+Follow these steps to run the entire application stack on your local machine using docker. (If you just want to check how the app works, then this is your way to go. If you plan to develop and contribute, then follow the "Run for Development and Contribution" section).
 
 ### Prerequisites
 - Docker
 - Docker Compose
+- Node.js
 
 ### Step-by-step Instructions
 1. Clone the Repository.
-```bash
-git clone https://github.com/mazeduldev/ai-agent-manager.git
-```
+    ```bash
+    git clone https://github.com/mazeduldev/ai-agent-manager.git
+    ```
 
-2. Configure Root environment. Rename `.env.example` file in the root to `.env`
+2. Configure environment. All the project directories including the root directory have `.env.example` file. You have to create a `.env` file with similar values. Running the following command will automatically do this for you.
+    ```bash
+    node ./_scripts/env_init
+    ```
 
-3. Configure Frontend environment. Frontend projects are at `/frontends/dashboard` and `/frontends/chatbox` both have `.env.example` files. Rename them to `.env`
+3. Prepare environment to run the app in docker container. In docker network `localhost` will not work. Service to service communication must use service names in docker-compose file. So, service URLs in .env files needed to be updated. Run the following command to do this.
+    ```bash
+    node ./_scripts/env_switcher docker
+    ```
 
-4. Configure Backend environment. Backend projects are at `/backends/auth`, `/backends/agent`, and `/backends/chat` directories. All of them have `.env.example` files. Rename them to `.env`
+4. Very Important: **you must provide your own OpenAI API Key.**
+`/backends/chat/.env` file requires OpenAI API Key. I'm not providing my one here :)
 
-5. **Very Important: you must provide your own OpenAI API Key.**
-Following file requires OpenAI API Key. I'm not providing my one here :)
-```
-/backends/chat/.env
-```
+5. Build and Run with Docker Compose. Following will build all the service images similar to a production build and start the containers.
+    ```bash
+    docker-compose -f docker-compose.prod.yml up --build
+    ```
 
-6. Build and Run with Docker Compose. From the root directory, run the following command.
-```bash
-# run this command for dev build with hot reload and debug log
-docker-compose up --build
-
-# run this command for production build
-docker-compose -f docker-compose.prod.yml up --build
-```
-This will build all the service images similar to a production build and start the containers.
-
-7. Access the Applications. Once all containers are running, you can access the services at:
+6. Access the Applications. Once all containers are running, you can access the services at:
     - Dashboard: http://localhost:3000
     - Chatbox: http://localhost:4000/chat/{agentId}
     - Database (PostgreSQL): Connect via port 5432
@@ -86,12 +83,18 @@ This will build all the service images similar to a production build and start t
 1. **Infrastructure**: I strongly suggest using docker-compose only for running the development infrastructure using the following command.
 
     ```bash
-    docker-compose -f docker-compose.infra.yml up -d
+    docker-compose -f docker-compose.yml up -d
     ```
 
 2. **Backend Services**: Import backend Spring Boot projects individually into your preferred IDE for java. My recommendation goes for [Intellij IDEA](https://www.jetbrains.com/idea/). Then run with it's built-in application runner.
 
 3. **Frontend**: Any code editor with support for [Biome](https://biomejs.dev/) should work. I recommend using [vscode](https://code.visualstudio.com/) or [cursor](https://cursor.com/).
+
+#### Alternative option for docker lovers
+You can run everything inside docker with hot reload support by running following command. (This is experimental and not recommended.)
+```bash
+docker-compose -f docker-compose.local.yml up --build
+```
 
 ## API Documentation
 Here are some of the key API endpoints available.
