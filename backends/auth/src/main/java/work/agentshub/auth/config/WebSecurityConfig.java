@@ -39,6 +39,7 @@ public class WebSecurityConfig {
                 .sessionManagement(session
                         -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/auth/signup", "/auth/login", "/auth/refresh").permitAll()
                         .requestMatchers("/internal/**").permitAll() // Internal API secured by InternalServiceAuthFilter
                         .anyRequest().authenticated()
