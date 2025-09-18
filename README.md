@@ -1,6 +1,6 @@
-# Verbex - AI Agent Management Platform
+# AgentsHub - AI Agent Management Platform
 
-Verbex is a full-stack application designed to provide a seamless platform to build, monitor, and scale AI agents. It features a command center dashboard, multiple backend microservices, and a complete containerized setup for easy deployment.
+AgentsHub is a full-stack application designed to provide a seamless platform to build, monitor, and scale AI agents. It features a command center dashboard, multiple backend microservices, and a complete containerized setup for easy deployment.
 
 ## Demo video
 
