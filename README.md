@@ -97,9 +97,14 @@ docker-compose -f docker-compose.local.yml up --build
 ```
 
 ## API Documentation
-Here are some of the key API endpoints available.
+For API documentation please visit the URLs while running the project locally.
 
-I'll update with OpenAPI/Swagger later.
+| Service | OpenAPI Documentation |
+|---------|-------------------|
+| Auth Service | http://localhost:8080/swagger-ui/index.html |
+| Agent Service | http://localhost:8100/swagger-ui/index.html |
+| Chat Service | http://localhost:8200/swagger-ui/index.html |
+| Analytics Service | *Not implemented yet. See the chat services for now.* |
 
 ## AI Tools Usage
 This project was developed with the extensive use of an AI programming assistant.
