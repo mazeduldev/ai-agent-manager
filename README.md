@@ -4,7 +4,7 @@ AgentsHub is a full-stack application designed to provide a seamless platform to
 
 ## Demo video
 
-https://www.loom.com/share/f6d9d35cd1aa47be9a7add68aaa5cb5a?sid=077f3ea8-6ebb-493a-9bd3-49e474a40157
+[![Project demo video](https://img.youtube.com/vi/52cSUIiBWjE/0.jpg)](https://www.youtube.com/watch?v=52cSUIiBWjE)
 
 ## Architecture
 
